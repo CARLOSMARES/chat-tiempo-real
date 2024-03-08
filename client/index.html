@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="module">
         import { io } from 'https://cdn.socket.io/4.7.4/socket.io.esm.min.js';
-        const socket = io();
+        const socket = io({
+            auth: {
+                serverOffset: 0
+            }
+        });
 
         const form = document.getElementById('form');
         const input = document.getElementById('input');
@@ -14,6 +18,7 @@
         socket.on(`chat message`, (msg)=>{
             const item = `<li>${msg}</li>`;
             messages.insertAdjacentHTML('beforeend', item);
+            socket.auth.serverOffset = serverOffset
         })
 
         form.addEventListener('submit', (e)=>{
