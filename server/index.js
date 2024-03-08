@@ -16,7 +16,7 @@ const server = createServer(app);
 
 const db = createClient({
     url: `libsql://driving-blue-marvel-carlosmares.turso.io`,
-    authToken: process.env.DB_TOKEN,
+    authToken: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MDk4NzgwNjAsImlkIjoiZDE5YzAwNWMtN2ZkMS00ZTFiLWE1MmMtODAxOTVlZTVhMWU4In0.g3R8dMqzTn0LI6ASxGI1VM_bb1YqLVsoq7yHOAwGDG13yT7yBhayWPpa0t5DPutuDe5uQT-L8EIZwWnfhhbHBg"//process.env.DB_TOKEN,
 })
 
 await db.execute(`
@@ -41,8 +41,8 @@ io.on("connection", async (socket)=>{
 
     socket.on('chat message', async (msg)=>{
         let result
+        const user = socket.handshake.auth.username ?? 'anonimo';
         try{
-            const user = socket.handshake.auth.username ?? 'anonimo';
             result = await db.execute({
                 sql: `INSERT INTO messages (content, username) VALUES (:content, :username)`,
                 args: { content: msg , username: user}
