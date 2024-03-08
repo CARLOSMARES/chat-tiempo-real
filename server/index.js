@@ -22,7 +22,8 @@ const db = createClient({
 await db.execute(`
     CREATE TABLE IF NOT EXISTS messages(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        content TEXT
+        content TEXT,
+        username TEXT
     )
 `)
 
@@ -38,30 +39,31 @@ io.on("connection", async (socket)=>{
         console.log('a user has desconnecteds')
     })
 
-    socket.on('chat message', async (msg, serverOffset)=>{
+    socket.on('chat message', async (msg)=>{
         let result
         try{
+            const user = socket.handshake.auth.username ?? 'anonimo';
             result = await db.execute({
-                sql: `INSERT INTO messages (content) VALUES (:content)`,
-                args: { content: msg }
+                sql: `INSERT INTO messages (content, username) VALUES (:content, :username)`,
+                args: { content: msg , username: user}
             })
         }
         catch (e){
             console.error(e);
             return;
         }
-        io.emit('chat message', msg, result.lastInsertRowid.toString());
+        io.emit('chat message', msg, result.lastInsertRowid.toString(), user);
     })
     if(!socket.recovered){
         try{
             const result = await db.execute({
-                sql: `SELECT id, content FROM messages WHERE id > ?`,
+                sql: `SELECT id, content, username FROM messages WHERE id > ?`,
                 args: [
                     socket.handshake.auth.serverOffset ?? 0 
                 ]
             })
             result.rows.forEach(row =>{
-                socket.emit('chat message', row.content, row.id.toString());
+                socket.emit('chat message', row.content, row.id.toString(), row.username);
             })
         }
         catch(e){
