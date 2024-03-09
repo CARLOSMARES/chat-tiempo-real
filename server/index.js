@@ -86,9 +86,9 @@ app.use(limiter);
 
 app.get("/", (req, res)=>{
     const path = process.cwd() + `/client/index.html`;
-    if(isValidPath(path)){
+    // if(isValidPath(path)){
         res.sendFile(path);
-    }
+    // }
 })
 
 server.listen(port, (err)=>{
