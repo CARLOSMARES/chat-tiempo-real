@@ -75,8 +75,20 @@ io.on("connection", async (socket)=>{
 
 app.use(logger('dev'))
 
+import RateLimit from 'express-rate-limit';
+
+var limiter = RateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000,
+});
+
+app.use(limiter);
+
 app.get("/", (req, res)=>{
-    res.sendFile(process.cwd() + `/client/index.html`)
+    const path = process.cwd() + `/client/index.html`;
+    if(isValidPath(path)){
+        res.sendFile(path);
+    }
 })
 
 server.listen(port, (err)=>{
